@@ -12,12 +12,8 @@ const RestaurantSchema = new mongoose.Schema({
   categories: [String],
   reviews: [
     {
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-      },
-      message: {
-        type: String,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review",
     },
   ],
   rating: { type: String },

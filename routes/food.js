@@ -4,6 +4,7 @@ const Food = require("../model/Food");
 const Restaurant = require("../model/Restaurant");
 const Joi = require("@hapi/joi");
 const { throughError } = require("../utils");
+const bodyParser = require("body-parser");
 
 router.post("/createfood/:restaurantId", async (req, res) => {
   const schema = Joi.object().keys({
@@ -12,7 +13,7 @@ router.post("/createfood/:restaurantId", async (req, res) => {
       .min(3)
       .max(30)
       .required()
-      .error((errors) => throughError(errors, "Title Name")),
+      .error((errors) => throughError(errors, "Food Title")),
     image: Joi.string()
       .trim()
       .required()
@@ -22,13 +23,6 @@ router.post("/createfood/:restaurantId", async (req, res) => {
       .error((errors) => throughError(errors, "Food Price")),
   });
 
-  const foodExists = await Food.findOne({
-    name: req.body.title,
-  });
-
-  if (foodExists)
-    return res.json({ status: 0, message: "Food Already Exists!" });
-
   if (mongoose.Types.ObjectId.isValid(req.params.restaurantId)) {
     try {
       await schema.validateAsync({
@@ -37,24 +31,47 @@ router.post("/createfood/:restaurantId", async (req, res) => {
         price: req.body.price,
       });
 
-      const restaurant = await Restaurant.findById(req.params.restaurantId);
+      const foodExists = await Food.findOne({
+        title: req.body.title,
+      });
 
-      if (restaurant) {
-        const food = await new Food(req.body);
+      if (foodExists)
+        return res.json({ status: 0, message: "Food Already Exists!" });
+      else {
+        const restaurant = await Restaurant.findById(req.params.restaurantId);
 
-        food.restaurant = restaurant;
+        if (restaurant) {
+          const food = new Food(req.body);
+          // //added restaurant to food
+          food.restaurant = { ...restaurant };
+          // //saved food
+          await food.save();
+          // //added food to restaurant
+          await restaurant.foods.push(food);
+          // //saved restaurant
+          await restaurant.save();
 
-        await food.save();
-
-        return res.json({ status: 1, data: food });
-      } else {
-        return res.json({ status: 0, data: "No Restaurant Found!" });
+          return res.json({ status: 1, data: food });
+        } else {
+          return res.json({ status: 0, data: "No Restaurant Found!" });
+        }
       }
     } catch (err) {
+      console.log("ERR", err);
       return res.json({ status: 0, message: err.message });
     }
   } else {
     return res.json({ status: 0, data: "Invalid Restaurant Id!" });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const foods = await Food.find({});
+
+    return res.json({ status: 1, data: foods });
+  } catch (err) {
+    return res.json({ status: 0, data: err.message });
   }
 });
 
