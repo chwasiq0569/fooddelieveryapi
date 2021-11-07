@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const userRoute = require("./routes/user");
+const restaurantRoute = require("./routes/restaurant");
 
 const app = express();
 app.use(express.json());
@@ -12,6 +13,7 @@ mongoose
   .catch((err) => console.log("CONNECTION FAILED: ", err));
 
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/restaurant", restaurantRoute);
 
 const PORT = process.env.PORT || 5000;
 
