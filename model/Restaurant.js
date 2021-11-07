@@ -21,6 +21,12 @@ const RestaurantSchema = new mongoose.Schema({
     },
   ],
   rating: { type: String },
+  foods: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Food",
+    },
+  ],
 });
 
 const Restaurant = mongoose.model("Restaurant", RestaurantSchema);

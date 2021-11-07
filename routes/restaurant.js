@@ -28,7 +28,7 @@ router.get("/:id", authorizeUser, async (req, res) => {
       return res.json({ status: 0, data: err.message });
     }
   }
-  return res.json({ status: 0, data: "No Restaurant Found!" });
+  return res.json({ status: 0, data: "Invalid Restaurant Id!" });
 });
 
 router.post("/addrestaurant", authorizeUser, async (req, res) => {
@@ -48,16 +48,16 @@ router.post("/addrestaurant", authorizeUser, async (req, res) => {
   console.log("req.headers.token", req.headers.token);
 
   try {
+    await schema.validateAsync({
+      name: req.body.name,
+      image: req.body.image,
+    });
+
     const restaurantExists = await Restaurant.findOne({
       name: req.body.name,
     });
 
     console.log("req.body", req.body);
-
-    await schema.validateAsync({
-      name: req.body.name,
-      image: req.body.name,
-    });
 
     if (restaurantExists)
       return res.json({ status: 0, message: "Restaurant already exists." });
