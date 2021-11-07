@@ -3,6 +3,33 @@ const Restaurant = require("../model/Restaurant");
 const Joi = require("@hapi/joi");
 const { throughError } = require("../utils");
 const { authorizeUser } = require("../middlewares/auth");
+const mongoose = require("mongoose");
+
+router.get("/", authorizeUser, async (req, res) => {
+  try {
+    const restaurants = await Restaurant.find({});
+
+    return res.json({ status: 1, data: restaurants });
+  } catch (err) {
+    return res.json({ status: 0, data: err.message });
+  }
+});
+
+router.get("/:id", authorizeUser, async (req, res) => {
+  if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+    try {
+      const restaurant = await Restaurant.findById(req.params.id);
+      if (restaurant) {
+        return res.json({ status: 1, data: restaurant });
+      } else {
+        return res.json({ status: 0, data: "No Restaurant Found!" });
+      }
+    } catch (err) {
+      return res.json({ status: 0, data: err.message });
+    }
+  }
+  return res.json({ status: 0, data: "No Restaurant Found!" });
+});
 
 router.post("/addrestaurant", authorizeUser, async (req, res) => {
   const schema = Joi.object().keys({
