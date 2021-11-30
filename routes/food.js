@@ -65,6 +65,28 @@ router.post("/createfood/:restaurantId", async (req, res) => {
   }
 });
 
+//
+
+router.post("/:restaurantId", async (req, res) => {
+  if (mongoose.Types.ObjectId.isValid(req.params.restaurantId)) {
+    try {
+      const restaurantId = req.params.restaurantId;
+
+      const food = await Food.find({ restaurant: restaurantId });
+
+      if (food) {
+        res.json({ status: 1, data: food });
+      } else {
+        res.json({ status: 0, message: "No Food Exists!" });
+      }
+    } catch (err) {
+      res.json({ status: 0, message: err.message });
+    }
+  } else {
+    res.json({ status: 0, message: "Invalid Restaurant Id!" });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const foods = await Food.find({});

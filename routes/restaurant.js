@@ -5,7 +5,7 @@ const { throughError } = require("../utils");
 const { authorizeUser } = require("../middlewares/auth");
 const mongoose = require("mongoose");
 
-router.get("/", authorizeUser, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const restaurants = await Restaurant.find({});
 
@@ -15,7 +15,7 @@ router.get("/", authorizeUser, async (req, res) => {
   }
 });
 
-router.get("/:id", authorizeUser, async (req, res) => {
+router.get("/:id", async (req, res) => {
   if (mongoose.Types.ObjectId.isValid(req.params.id)) {
     try {
       const restaurant = await Restaurant.findById(req.params.id);
